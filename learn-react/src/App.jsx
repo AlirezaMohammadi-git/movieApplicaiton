@@ -1,11 +1,11 @@
 
 import heroImage from './assets/hero.png'
 import { SearchBox } from './components/Search.jsx'
-import { useContext, useDeferredValue, useEffect, useState, useTransition } from 'react'
+import { useContext, useDeferredValue, useEffect, useState, useSyncExternalStore } from 'react'
 import { Spinner } from './components/spinner.jsx'
 import { MovieCard } from './components/MovieCard.jsx'
-import { useDebounce } from 'use-debounce'
 import { GlobalStateContext, MovieStateContext } from './States.jsx'
+import { fetchMovies, getState, subscribe } from './Stores/MovieStore.js'
 
 const Header = () => {
 
@@ -55,57 +55,11 @@ export const AllMovies = () => {
 
 export const App = () => {
 
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isPending, startTransition] = useTransition();
-  const [movieList, setMovieList] = useState([]);
+  const { movieList, errorMessage, isPending } = useSyncExternalStore(subscribe, getState)
   const [searchTerm, setSearchTerm] = useState("");
   const deferredSearchTerm = useDeferredValue(searchTerm);
   //While these techniques are helpful in some cases, useDeferredValue is better suited to optimizing rendering because it is deeply integrated with React itself and adapts to the user's device. Unlike debouncing or throttling, it doesn't require choosing any fixed delay.
-  const BASE_URL = "https://api.themoviedb.org/3";
-  const API_KEY = import.meta.env.VITE_API_KEY;
-  const API_OPTIONS = {
-    method: "GET",
-    headers: {
-      accept: 'application/json',
-      Authorization: `Bearer ${API_KEY}`
-    }
-  }
 
-  async function fetchMovies(query = '') {
-
-    const endpoint = query
-      ? `${BASE_URL}/search/movie?query=${encodeURIComponent(query)}&include_adult=true`
-      : `${BASE_URL}/discover/movie?include_adult=false&include_video=true&language=en-US&page=1&sort_by=popularity.desc`;
-    setErrorMessage('');
-
-    startTransition(async () => {
-      try {
-
-        const response = await fetch(endpoint, API_OPTIONS);
-
-        if (!response.ok) {
-          throw new Error("failed to fetch data");
-        }
-
-        const data = await response.json();
-        if (data.Response === "False") {
-          setErrorMessage(data.error) || "Failed to load movies";
-          setMovieList([])
-          return;
-        }
-
-        setMovieList(Array.from(data.results))
-
-      } catch (error) {
-        setErrorMessage('Failed to Load movies. Please try again later!')
-        console.log(`Error while fetching movies in App.jsx : ${error}`)
-      }
-    })
-
-  }
-
-
-  // below will run only one time! because of empty dependencies.
   useEffect(() => {
     fetchMovies(deferredSearchTerm)
   }, [deferredSearchTerm])
