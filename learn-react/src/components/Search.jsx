@@ -1,7 +1,10 @@
-import React from "react"
+import React, { useContext } from "react"
 import searchIcon from '../assets/search.svg'
+import { GlobalStateContext } from "../States"
 
-export const SearchBox = ({ searchTerm, setSearchTerm }) => {
+export const SearchBox = () => {
+
+    const { searchTerm, setSearchTerm } = useContext(GlobalStateContext)
     // Don't change searchTerm itself,use setSearchTerm to change it (otherwise react will break!)
     // incorrect : searchTerm = "new value";
     // correct : setSearchTerm('new value')

@@ -1,8 +1,13 @@
-import React from "react"
+import React, { useContext } from "react"
 import starImage from '../assets/star.svg'
 import noMovieImage from "../assets/no-movie.png"
+import { GlobalStateContext } from "../States"
 
-export const MovieCard = ({ movie: { title, poster_path, vote_average, original_language, release_date } }) => {
+export const MovieCard = () => {
+
+    const { movie: { title, poster_path, vote_average, original_language, release_date } } = useContext(GlobalStateContext)
+    //    const { title, poster_path, vote_average, original_language, release_date } = movie;
+
     return (
         <div className="movie-card">
             <img src={poster_path ? `https://image.tmdb.org/t/p/w500/${poster_path}` : noMovieImage} alt="" />

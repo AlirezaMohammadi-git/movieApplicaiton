@@ -1,13 +1,16 @@
 
 import heroImage from './assets/hero.png'
 import { SearchBox } from './components/Search.jsx'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Spinner } from './components/spinner.jsx'
 import { MovieCard } from './components/MovieCard.jsx'
 import { useDebounce } from 'use-debounce'
+import { GlobalStateContext } from './States.jsx'
 
+const Header = () => {
 
-const Header = ({ searchTerm, setSearchTerm }) => {
+  const { searchTerm, setSearchTerm } = useContext(GlobalStateContext)
+
   return (
     <main>
       <div className='pattern' />
@@ -25,7 +28,10 @@ const Header = ({ searchTerm, setSearchTerm }) => {
   )
 }
 
-export const AllMovies = ({ isLoading, movieList, errorMessage }) => {
+export const AllMovies = () => {
+
+  const { isLoading, movieList, errorMessage } = useContext(GlobalStateContext)
+
   return (<section className='all-movies'>
     <h2>All Movies</h2>
     {
@@ -100,10 +106,10 @@ export const App = () => {
   }, [debounceSearchTerm])
 
   return (
-    <>
-      <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-      <AllMovies isLoading={isLoading} movieList={movieList} errorMessage={errorMessage} />
-    </>
+    <GlobalStateContect.Provider value={{ searchTerm, setSearchTerm, isLoading, errorMessage, movieList }}>
+      <Header />
+      <AllMovies />
+    </GlobalStateContect.Provider>
   )
 }
 
