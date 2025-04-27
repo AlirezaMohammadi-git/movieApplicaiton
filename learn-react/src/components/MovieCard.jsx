@@ -1,12 +1,11 @@
 import React, { useContext } from "react"
 import starImage from '../assets/star.svg'
 import noMovieImage from "../assets/no-movie.png"
-import { GlobalStateContext } from "../States"
+import { MovieStateContext } from "../States"
 
 export const MovieCard = () => {
 
-    const { movie: { title, poster_path, vote_average, original_language, release_date } } = useContext(GlobalStateContext)
-    //    const { title, poster_path, vote_average, original_language, release_date } = movie;
+    const { movie: { title, poster_path, vote_average, original_language, release_date } } = useContext(MovieStateContext);
 
     return (
         <div className="movie-card">

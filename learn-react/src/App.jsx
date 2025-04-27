@@ -1,11 +1,11 @@
 
 import heroImage from './assets/hero.png'
 import { SearchBox } from './components/Search.jsx'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState, useTransition } from 'react'
 import { Spinner } from './components/spinner.jsx'
 import { MovieCard } from './components/MovieCard.jsx'
 import { useDebounce } from 'use-debounce'
-import { GlobalStateContext } from './States.jsx'
+import { GlobalStateContext, MovieStateContext } from './States.jsx'
 
 const Header = () => {
 
@@ -30,29 +30,33 @@ const Header = () => {
 
 export const AllMovies = () => {
 
-  const { isLoading, movieList, errorMessage } = useContext(GlobalStateContext)
+  const { isPending, movieList, errorMessage } = useContext(GlobalStateContext)
 
-  return (<section className='all-movies'>
-    <h2>All Movies</h2>
-    {
-      isLoading ?
-        (<Spinner />) :
-        errorMessage ?
-          (<p className='text-red-500'>{errorMessage}</p>) :
-          (<ul>
-            {movieList.map(movie => (
-              <MovieCard key={movie.id} movie={movie} />
-            ))}
-          </ul>)
-    }
+  return (
+    <section className='all-movies'>
+      <h2>All Movies</h2>
+      {
+        isPending ?
+          (<Spinner />) :
+          errorMessage ?
+            (<p className='text-red-500'>{errorMessage}</p>) :
+            (<ul>
+              {movieList.map(movie => (
+                <MovieStateContext.Provider key={movie.id} value={{ movie }}>
+                  <MovieCard />
+                </MovieStateContext.Provider>
+              ))}
+            </ul>)
+      }
 
-  </section>)
+    </section>
+  )
 }
 
 export const App = () => {
 
   const [errorMessage, setErrorMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [movieList, setMovieList] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [debounceSearchTerm] = useDebounce(searchTerm, 1000);
@@ -70,33 +74,33 @@ export const App = () => {
 
     const endpoint = query
       ? `${BASE_URL}/search/movie?query=${encodeURIComponent(query)}&include_adult=true`
-      : `${BASE_URL}/discover/movie?include_adult=true&include_video=true&language=en-US&page=1&sort_by=popularity.desc`;
-    setIsLoading(true);
+      : `${BASE_URL}/discover/movie?include_adult=false&include_video=true&language=en-US&page=1&sort_by=popularity.desc`;
     setErrorMessage('');
 
-    try {
+    startTransition(async () => {
+      try {
 
-      const response = await fetch(endpoint, API_OPTIONS);
+        const response = await fetch(endpoint, API_OPTIONS);
 
-      if (!response.ok) {
-        throw new Error("failed to fetch data");
+        if (!response.ok) {
+          throw new Error("failed to fetch data");
+        }
+
+        const data = await response.json();
+        if (data.Response === "False") {
+          setErrorMessage(data.error) || "Failed to load movies";
+          setMovieList([])
+          return;
+        }
+
+        setMovieList(Array.from(data.results))
+
+      } catch (error) {
+        setErrorMessage('Failed to Load movies. Please try again later!')
+        console.log(`Error while fetching movies in App.jsx : ${error}`)
       }
+    })
 
-      const data = await response.json();
-      if (data.Response === "False") {
-        setErrorMessage(data.error) || "Failed to load movies";
-        setMovieList([])
-        return;
-      }
-
-      setMovieList(Array.from(data.results))
-
-    } catch (error) {
-      setErrorMessage('Failed to Load movies. Please try again later!')
-      console.log(`Error while fetching movies in App.jsx : ${error}`)
-    } finally {
-      setIsLoading(false)
-    }
   }
 
 
@@ -106,10 +110,10 @@ export const App = () => {
   }, [debounceSearchTerm])
 
   return (
-    <GlobalStateContect.Provider value={{ searchTerm, setSearchTerm, isLoading, errorMessage, movieList }}>
+    <GlobalStateContext.Provider value={{ searchTerm, setSearchTerm, isPending, errorMessage, movieList }}>
       <Header />
       <AllMovies />
-    </GlobalStateContect.Provider>
+    </GlobalStateContext.Provider>
   )
 }
 
