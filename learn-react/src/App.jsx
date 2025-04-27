@@ -1,7 +1,7 @@
 
 import heroImage from './assets/hero.png'
 import { SearchBox } from './components/Search.jsx'
-import { useContext, useEffect, useState, useTransition } from 'react'
+import { useContext, useDeferredValue, useEffect, useState, useTransition } from 'react'
 import { Spinner } from './components/spinner.jsx'
 import { MovieCard } from './components/MovieCard.jsx'
 import { useDebounce } from 'use-debounce'
@@ -59,7 +59,8 @@ export const App = () => {
   const [isPending, startTransition] = useTransition();
   const [movieList, setMovieList] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [debounceSearchTerm] = useDebounce(searchTerm, 1000);
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+  //While these techniques are helpful in some cases, useDeferredValue is better suited to optimizing rendering because it is deeply integrated with React itself and adapts to the user's device. Unlike debouncing or throttling, it doesn't require choosing any fixed delay.
   const BASE_URL = "https://api.themoviedb.org/3";
   const API_KEY = import.meta.env.VITE_API_KEY;
   const API_OPTIONS = {
@@ -106,8 +107,8 @@ export const App = () => {
 
   // below will run only one time! because of empty dependencies.
   useEffect(() => {
-    fetchMovies(debounceSearchTerm)
-  }, [debounceSearchTerm])
+    fetchMovies(deferredSearchTerm)
+  }, [deferredSearchTerm])
 
   return (
     <GlobalStateContext.Provider value={{ searchTerm, setSearchTerm, isPending, errorMessage, movieList }}>
