@@ -17,7 +17,8 @@
 
     --breakpoint-xs: 480px;
 
-    --background-image-hero-pattern: url("/hero-bg.png");
+    --background-image-hero-pattern: url("./assets/hero-bg.png");
+    --bg-hero-pattern: url("./assets/hero.png")
 }
 
 @layer base {
@@ -36,7 +37,7 @@
     }
 
     main {
-        @apply min-h-screen relative bg-primary;
+        @apply relative bg-primary;
     }
 
     header {
@@ -45,6 +46,10 @@
 
     header img {
         @apply w-full max-w-lg h-auto object-contain mx-auto drop-shadow-md;
+    }
+
+    p {
+        @apply text-white
     }
 }
 
@@ -94,10 +99,11 @@
     }
 
     .all-movies {
-        @apply space-y-9;
+        @apply space-y-9 relative z-1 max-w-8/10 mx-auto;
+
 
         & ul {
-            @apply grid grid-cols-1 gap-5 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4;
+            @apply grid grid-cols-1 gap-5 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 relative z-1;
         }
     }
 
