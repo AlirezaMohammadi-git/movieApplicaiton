@@ -1,11 +1,13 @@
 
 import heroImage from './assets/hero.png'
 import { SearchBox } from './components/Search.jsx'
-import { useContext, useDeferredValue, useEffect, useState, useSyncExternalStore } from 'react'
+import { useContext, useDeferredValue, useState } from 'react'
 import { Spinner } from './components/spinner.jsx'
 import { MovieCard } from './components/MovieCard.jsx'
 import { GlobalStateContext, MovieStateContext } from './States.jsx'
-import { fetchMovies, getState, subscribe } from './Stores/MovieStore.js'
+import { useQuery } from '@tanstack/react-query'
+import createMovieQueryOptions from './data/queryOptions/MovieQueryOptions.js'
+import { ErrorPage } from './components/ErrorPage.jsx'
 
 const Header = () => {
 
@@ -54,18 +56,36 @@ export const AllMovies = () => {
 }
 
 export const App = () => {
-
-  const { movieList, errorMessage, isPending } = useSyncExternalStore(subscribe, getState)
   const [searchTerm, setSearchTerm] = useState("");
-  const deferredSearchTerm = useDeferredValue(searchTerm);
   //While these techniques are helpful in some cases, useDeferredValue is better suited to optimizing rendering because it is deeply integrated with React itself and adapts to the user's device. Unlike debouncing or throttling, it doesn't require choosing any fixed delay.
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+  const { data, isPending, isError, error } = useQuery(createMovieQueryOptions(deferredSearchTerm))
 
-  useEffect(() => {
-    fetchMovies(deferredSearchTerm)
-  }, [deferredSearchTerm])
+  // -- working with multiple queries : 
+  // const [ {data} , result2 , result3 ] = useQueries(
+  //   {
+  //     queries : [
+  //       createMovieQueryOptions(),
+  //       createUserQueryOptions(),
+  //       createAnimeQueryOptions(),
+  //     ]
+  //   }
+  // )
+
+  if (isError) {
+    return <ErrorPage />
+  }
 
   return (
-    <GlobalStateContext.Provider value={{ searchTerm, setSearchTerm, isPending, errorMessage, movieList }}>
+    <GlobalStateContext.Provider value={
+      {
+        searchTerm,
+        setSearchTerm,
+        isPending,
+        errorMessage: error ? error.message : "",
+        movieList: data ? Array.from(data.results) : []
+      }
+    }>
       <Header />
       <AllMovies />
     </GlobalStateContext.Provider>
