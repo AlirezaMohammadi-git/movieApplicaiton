@@ -22,6 +22,10 @@
 }
 
 @layer base {
+    html {
+        @apply hide-scrollbar;
+    }
+
     body {
         font-family: "DM Sans", serif;
         font-optical-sizing: auto;
@@ -97,6 +101,34 @@
             @apply w-full bg-transparent py-2 sm:pr-10 pl-10 text-base text-gray-200 placeholder-light-200 outline-hidden;
         }
     }
+
+    .search-float {
+
+        @apply opacity-0 w-full bg-white/80 max-w-1/1 sm:max-w-7/10 px-4 py-3 sm:rounded-lg rounded-none fixed top-0 sm:top-20 left-0 sm:left-5/10 translate-none sm:-translate-5/10 transition duration-200;
+
+
+        &.invisible {
+            @apply invisible;
+        }
+
+        &.active {
+            @apply opacity-100;
+        }
+
+
+        & div {
+            @apply relative flex flex-row items-center;
+        }
+
+        & img {
+            @apply absolute left-2 h-5 w-5;
+        }
+
+        & input {
+            @apply w-full bg-transparent py-2 sm:pr-10 pl-10 text-base text-black placeholder-gray-800 outline-hidden;
+        }
+    }
+
 
     .all-movies {
         @apply space-y-9 relative z-1 max-w-8/10 mx-auto;
