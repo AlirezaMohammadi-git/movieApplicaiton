@@ -21,6 +21,7 @@ export const fetchMovies = async (query = '', page = 1) => {
 
 
     /* TODO : use anxios library instead of fetch. and use it's cancellation feature to avoid unecessary requestes. */
+    // https://axios-http.com/docs/cancellation
     const response = await fetch(endpoint, API_OPTIONS);
     const result = await response.json();
     return result;

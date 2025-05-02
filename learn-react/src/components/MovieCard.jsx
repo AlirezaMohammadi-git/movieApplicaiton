@@ -9,7 +9,11 @@ export const MovieCard = () => {
 
     return (
         <div className="movie-card">
-            <img src={poster_path ? `https://image.tmdb.org/t/p/w500/${poster_path}` : noMovieImage} alt="" />
+            <img
+                src={poster_path ? `https://image.tmdb.org/t/p/w500/${poster_path}` : noMovieImage}
+                alt=""
+                onError={(e) => { e.target.onError = null /*Preventing infinite loop*/; e.target.src = noMovieImage }}
+            />
             <div className="mt-4" />
             <h3>{title}</h3>
             <div className="content">
