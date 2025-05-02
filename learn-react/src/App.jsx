@@ -1,13 +1,14 @@
 
 import heroImage from './assets/hero.png'
 import { SearchBox } from './components/Search.jsx'
-import { useContext, useDeferredValue, useState } from 'react'
+import { useContext, useDeferredValue, useState, useRef, useCallback, useEffect } from 'react'
 import { Spinner } from './components/spinner.jsx'
 import { MovieCard } from './components/MovieCard.jsx'
 import { GlobalStateContext, MovieStateContext } from './States.jsx'
 import { useQuery } from '@tanstack/react-query'
 import createMovieQueryOptions from './data/queryOptions/MovieQueryOptions.js'
 import { ErrorPage } from './components/ErrorPage.jsx'
+import InfiniteScrollComponent from './test.jsx'
 
 const Header = () => {
 
@@ -32,26 +33,68 @@ const Header = () => {
 
 export const AllMovies = () => {
 
-  const { isPending, movieList, errorMessage } = useContext(GlobalStateContext)
+  const { deferredSearchTerm } = useContext(GlobalStateContext)
+  const [movieList, setMovieList] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(null);
+  const observerRef = useRef();
+  const { data, isPending, isError } = useQuery(createMovieQueryOptions(deferredSearchTerm, currentPage || 1))
+
+  useEffect(() => {
+    setMovieList([]);
+    setCurrentPage(1);
+  }, [deferredSearchTerm]);
+
+
+  useEffect(() => {
+    if (data) {
+      // using set to prevent douplicate items
+      setMovieList(prev => [...new Set([...prev, ...data.results])])
+      setTotalPages(data.total_pages)
+    }
+  }, [deferredSearchTerm, isPending, currentPage])
+
+  // useCallback is similar to useEffect, but we can use it to access element like useRef! and each time one of it's depencendies changes, the callback will run!
+  // combining useEffect and useRef => useCallback
+  const lastItemRef = useCallback(node => {
+
+    if (isPending) return;
+
+    // remove previous observer
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver(entries => {
+      // isIntersecting means if the element is visible on view port!
+      if (entries[0].isIntersecting && currentPage < totalPages) {
+        setCurrentPage(prevPage => prevPage + 1);
+      }
+    }, { threshold: 1 });
+
+
+    // if node changes (get visible for example) the callBack in IntersectionObserver will call.
+    if (node) observerRef.current.observe(node);
+
+
+  }, [isPending, currentPage, totalPages])
 
   return (
-    <section className='all-movies'>
-      <h2>All Movies</h2>
-      {
-        isPending ?
-          (<Spinner />) :
-          errorMessage ?
-            (<p className='text-red-500'>{errorMessage}</p>) :
-            (<ul>
-              {movieList.map(movie => (
-                <MovieStateContext.Provider key={movie.id} value={{ movie }}>
+    isError ? <ErrorPage /> :
+      <section className='all-movies'>
+        <h2>All Movies</h2>
+        <ul style={{ overflowY: "auto", scrollBehavior: "smooth" }} >
+          {movieList.map((movie, index) => {
+            const isLastItem = index === movieList.length - 1;
+            return (
+              <li key={`${index}`} ref={isLastItem ? lastItemRef : null} >
+                <MovieStateContext.Provider value={{ movie }}>
                   <MovieCard />
                 </MovieStateContext.Provider>
-              ))}
-            </ul>)
-      }
-
-    </section>
+              </li>
+            )
+          })}
+        </ul>
+        {isPending ? <Spinner /> : null}
+      </section >
   )
 }
 
@@ -59,8 +102,6 @@ export const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
   //While these techniques are helpful in some cases, useDeferredValue is better suited to optimizing rendering because it is deeply integrated with React itself and adapts to the user's device. Unlike debouncing or throttling, it doesn't require choosing any fixed delay.
   const deferredSearchTerm = useDeferredValue(searchTerm);
-  const { data, isPending, isError, error } = useQuery(createMovieQueryOptions(deferredSearchTerm))
-
   // -- working with multiple queries : 
   // const [ {data} , result2 , result3 ] = useQueries(
   //   {
@@ -72,18 +113,13 @@ export const App = () => {
   //   }
   // )
 
-  if (isError) {
-    return <ErrorPage />
-  }
 
   return (
     <GlobalStateContext.Provider value={
       {
         searchTerm,
         setSearchTerm,
-        isPending,
-        errorMessage: error ? error.message : "",
-        movieList: data ? Array.from(data.results) : []
+        deferredSearchTerm
       }
     }>
       <Header />
@@ -92,4 +128,4 @@ export const App = () => {
   )
 }
 
-export default App
+export default App 

@@ -13,11 +13,15 @@ const API_OPTIONS = {
 
 
 // function to fetch movies and update the state (TanStack Query will handle everything for us now!)
-export const fetchMovies = async (query = '') => {
+export const fetchMovies = async (query = '', page = 1) => {
     const endpoint = query
-        ? `${BASE_URL}/search/movie?query=${encodeURIComponent(query)}&include_adult=false`
-        : `${BASE_URL}/discover/movie?include_adult=false&include_video=true&language=en-US&page=1&sort_by=popularity.desc`;
+        ? `${BASE_URL}/search/movie?query=${encodeURIComponent(query)}&include_adult=false&page=${page}`
+        : `${BASE_URL}/discover/movie?include_adult=false&include_video=true&language=en-US&page=${page}&sort_by=popularity.desc`;
 
+
+
+    /* TODO : use anxios library instead of fetch. and use it's cancellation feature to avoid unecessary requestes. */
     const response = await fetch(endpoint, API_OPTIONS);
-    return await response.json();
+    const result = await response.json();
+    return result;
 }

@@ -10,7 +10,6 @@ export const SearchBox = () => {
 
     document.addEventListener('scrollend', () => {
         const cordinates = search.current.getBoundingClientRect();
-        console.log()
         if (cordinates.bottom > 0) {
             floatingSearch.current.classList.remove('active')
             setTimeout(() => {
