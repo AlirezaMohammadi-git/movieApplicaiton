@@ -1,7 +1,7 @@
 
 import heroImage from './assets/hero.png'
 import { SearchBox } from './components/Search.jsx'
-import { useContext, useDeferredValue, useState, useRef, useCallback, useEffect } from 'react'
+import { useContext, useState, useRef, useCallback, useEffect } from 'react'
 import { Spinner } from './components/spinner.jsx'
 import { MovieCard } from './components/MovieCard.jsx'
 import { GlobalStateContext, MovieStateContext } from './States.jsx'
@@ -33,17 +33,16 @@ const Header = () => {
 
 export const AllMovies = () => {
 
-  const { deferredSearchTerm } = useContext(GlobalStateContext)
+  const { searchTerm } = useContext(GlobalStateContext)
   const [movieList, setMovieList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(null);
   const observerRef = useRef();
-  const { data, isPending, isError, error } = useQuery(createMovieQueryOptions(deferredSearchTerm, currentPage || 1))
-
+  const { data, isPending, isError, error } = useQuery(createMovieQueryOptions(searchTerm, currentPage || 1))
   useEffect(() => {
     setMovieList([]);
     setCurrentPage(1);
-  }, [deferredSearchTerm]);
+  }, [searchTerm]);
 
 
   useEffect(() => {
@@ -52,7 +51,7 @@ export const AllMovies = () => {
       setMovieList(prev => [...new Set([...prev, ...data.results])])
       setTotalPages(data.total_pages)
     }
-  }, [deferredSearchTerm, isPending, currentPage])
+  }, [searchTerm, isPending, currentPage, data])
 
   // useCallback is similar to useEffect, but we can use it to access element like useRef! and each time one of it's depencendies changes, the callback will run!
   // combining useEffect and useRef => useCallback
@@ -100,26 +99,11 @@ export const AllMovies = () => {
 
 export const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  //While these techniques are helpful in some cases, useDeferredValue is better suited to optimizing rendering because it is deeply integrated with React itself and adapts to the user's device. Unlike debouncing or throttling, it doesn't require choosing any fixed delay.
-  const deferredSearchTerm = useDeferredValue(searchTerm);
-  // -- working with multiple queries : 
-  // const [ {data} , result2 , result3 ] = useQueries(
-  //   {
-  //     queries : [
-  //       createMovieQueryOptions(),
-  //       createUserQueryOptions(),
-  //       createAnimeQueryOptions(),
-  //     ]
-  //   }
-  // )
-
-
   return (
     <GlobalStateContext.Provider value={
       {
         searchTerm,
         setSearchTerm,
-        deferredSearchTerm
       }
     }>
       <Header />

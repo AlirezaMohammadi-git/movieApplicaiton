@@ -22,9 +22,6 @@
 }
 
 @layer base {
-    html {
-        @apply hide-scrollbar;
-    }
 
     body {
         font-family: "DM Sans", serif;
