@@ -4,7 +4,7 @@ import animationData from '../assets/error.json';
 
 
 
-export const ErrorPage = () => {
+export const ErrorPage = (error) => {
     const defaultOptions = {
         loop: true,
         autoplay: true,
@@ -13,6 +13,10 @@ export const ErrorPage = () => {
             preserveAspectRatio: "xMidYMid slice"
         }
     };
+
+    if (error) {
+        console.error("Error :", error)
+    }
 
     return (
         <div className='flex flex-col justify-center items-center w-full h-screen'>

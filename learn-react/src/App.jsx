@@ -38,7 +38,7 @@ export const AllMovies = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(null);
   const observerRef = useRef();
-  const { data, isPending, isError } = useQuery(createMovieQueryOptions(deferredSearchTerm, currentPage || 1))
+  const { data, isPending, isError, error } = useQuery(createMovieQueryOptions(deferredSearchTerm, currentPage || 1))
 
   useEffect(() => {
     setMovieList([]);
@@ -78,7 +78,7 @@ export const AllMovies = () => {
   }, [isPending, currentPage, totalPages])
 
   return (
-    isError ? <ErrorPage /> :
+    isError ? <ErrorPage value={{ error }} /> :
       <section className='all-movies'>
         <h2>All Movies</h2>
         <ul style={{ overflowY: "auto", scrollBehavior: "smooth" }} >
