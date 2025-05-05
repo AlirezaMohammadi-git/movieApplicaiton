@@ -15,7 +15,6 @@ export const SearchBox = () => {
             if (entries[0].isIntersecting) {
                 // main search bar is visible, so disabling floating search
                 floatingSearch.current.classList.remove('active')
-                search.focus();
                 setTimeout(() => {
                     if (!floatingSearch.current.classList.contains('active')) {
                         floatingSearch.current.classList.add('invisible')

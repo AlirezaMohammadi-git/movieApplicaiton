@@ -12,6 +12,15 @@
     --color-gray-100: #9ca4ab;
 
     --color-dark-100: #0f0d23;
+    --color-dark-200: #1c1934;
+    --color-dark-300: #282445;
+    --color-dark-400: #353056;
+    --color-dark-500: #423c67;
+    --color-dark-600: #4f4978;
+    --color-dark-700: #5c5589;
+    --color-dark-800: #69629a;
+    --color-dark-900: #767eab;
+
 
     --font-dm-sans: DM Sans, sans-serif;
 
@@ -55,6 +64,24 @@
 }
 
 @layer components {
+
+    .api-key {
+        @apply w-screen h-screen flex flex-col justify-center items-center gap-4;
+
+        & a {
+            @apply text-yellow-500 underline hover:text-yellow-300;
+        }
+
+        & input {
+            @apply bg-light-100 px-4 py-2 rounded-lg outline-hidden;
+        }
+
+        & button {
+            @apply py-1 px-4 text-white font-bold bg-dark-200 hover:bg-dark-400 rounded-sm;
+        }
+
+    }
+
     .pattern {
         @apply bg-hero-pattern w-screen h-screen bg-center bg-cover absolute z-0;
     }

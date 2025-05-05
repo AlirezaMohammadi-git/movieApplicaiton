@@ -5,8 +5,8 @@ import { useContext, useState, useRef, useCallback, useEffect } from 'react'
 import { Spinner } from './components/spinner.jsx'
 import { MovieCard } from './components/MovieCard.jsx'
 import { GlobalStateContext, MovieStateContext } from './States.jsx'
-import { useQuery } from '@tanstack/react-query'
-import createMovieQueryOptions from './data/queryOptions/MovieQueryOptions.js'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import createMovieQueryOptions, { createTestApiKeyQueryOptions } from './data/queryOptions/MovieQueryOptions.js'
 import { ErrorPage } from './components/ErrorPage.jsx'
 import InfiniteScrollComponent from './test.jsx'
 
@@ -92,15 +92,78 @@ export const AllMovies = () => {
             )
           })}
         </ul>
-        {isPending ? <Spinner /> : null}
+        <Spinner opacity={isPending ? 100 : 0} />
       </section >
   )
 }
 
+const RequetsApiKey = () => {
+
+  const [apiInput, setApiInput] = useState("");
+  const [emptyInput, setEmptyInput] = useState(false);
+  const [auth, setAuth] = useState(false);
+  const [opacity, setOpacity] = useState(0);
+  const { mutate, data, isPending, isError, isSuccess, error } = useMutation(createTestApiKeyQueryOptions());
+
+  useEffect(() => {
+    if (isError && error?.response?.status === 401) {
+      setAuth(true)
+    }
+  }, [isError, error])
+
+  useEffect(() => {
+    if (isPending) {
+      setOpacity(100)
+    } else {
+      setOpacity(0)
+    }
+  }, [isPending])
+
+  useEffect(() => {
+    if (isSuccess) {
+      if (data?.success === false) {
+        setAuth(true);
+      } else {
+        setAuth(false);
+        console.log("API Key is valid!");
+        localStorage.setItem('apiKey', apiInput)
+        window.location.reload();
+      }
+    }
+  }, [isSuccess, data]);
+
+  return (
+    <>
+
+      <div className='api-key'>
+        <h1>Enter your API key</h1>
+        <p className='text-center'>You can get your free api key from <a href='https://www.themoviedb.org/signup' target='_blanck'>TMDB website</a>.</p>
+        <input type="text" placeholder='enter you api key here...' value={apiInput} onChange={(e) => { setApiInput(e.target.value) }} />
+        <button onClick={() => {
+          setAuth(false)
+          if (apiInput.trim() === "") {
+            setEmptyInput(true)
+          } else {
+            setEmptyInput(false);
+            mutate(apiInput);
+          }
+        }} >Start</button>
+        {isError && (error.response?.status !== 401) && <p className='text-red-500'>Error while athentication! Please try again later.</p>}
+        {emptyInput && <p className='text-red-500'>input is empty!</p>}
+        {auth && <p className='text-red-500'>Invalid API key: You must be granted a valid key.</p>}
+        <Spinner opacity={opacity} />
+      </div>
+
+    </>
+  )
+
+}
+
 export const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const apiKey = localStorage.getItem('apiKey')
   return (
-    <GlobalStateContext.Provider value={
+    apiKey ? <GlobalStateContext.Provider value={
       {
         searchTerm,
         setSearchTerm,
@@ -108,7 +171,7 @@ export const App = () => {
     }>
       <Header />
       <AllMovies />
-    </GlobalStateContext.Provider>
+    </GlobalStateContext.Provider> : <RequetsApiKey />
   )
 }
 
