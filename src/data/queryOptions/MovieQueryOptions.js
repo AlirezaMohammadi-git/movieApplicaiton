@@ -5,17 +5,18 @@ import { fetchMovies, testApiKey } from "../movie/MovieService.js"
 export default function createMovieQueryOptions(deferredSearchTerm = "", page = 1) {
     return queryOptions({
         // don't forgot to pass your input in queryKey's array!
-        queryKey: ['movies', deferredSearchTerm, page],
-        queryFn: () => fetchMovies(deferredSearchTerm, page),
-    })
+        queryKey: ['searchMovie', deferredSearchTerm, page],
+        queryFn: fetchMovies,
+        staleTime: 0,
+        keepPreviousData: true,
+    });
 }
 
 
 export function createTestApiKeyQueryOptions() {
     return {
-        // don't forgot to pass your input in queryKey's array!
         mutationFn: (apiKey) => testApiKey(apiKey),
+        staleTime: 0,
+        keepPreviousData: true
     }
 }
-
-// youtube tutorial : https://www.youtube.com/watch?v=mPaCnwpFvZY

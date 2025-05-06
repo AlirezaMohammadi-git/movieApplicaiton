@@ -7,41 +7,28 @@ const API_KEY = localStorage.getItem("apiKey");
 let controller;
 
 // function to fetch movies and update the state (TanStack Query will handle everything for us now!)
-export const fetchMovies = async (query = '', page = 1) => {
+export const fetchMovies = async ({ queryKey, signal }) => {
 
+    const [_key, deferredSearchTerm, page] = queryKey;
 
-    if (controller) {
-        controller.abort();
-    }
-
-    controller = new AbortController();
-
-    const endpoint = query
-        ? `${BASE_URL}/search/movie?query=${encodeURIComponent(query)}&include_adult=false&page=${page}`
+    const endpoint = deferredSearchTerm
+        ? `${BASE_URL}/search/movie?query=${encodeURIComponent(deferredSearchTerm)}&include_adult=false&page=${page}`
         : `${BASE_URL}/discover/movie?include_adult=false&include_video=true&language=en-US&page=${page}&sort_by=popularity.desc`;
 
 
-    try {
-        const API_OPTIONS = {
-            method: "get",
-            headers: {
-                accept: 'application/json',
-                Authorization: `Bearer ${API_KEY}`
-            },
-            url: endpoint,
-            responseType: "json",
-            signal: controller.signal
-        }
-        const response = await axios(API_OPTIONS);
-        return await response.data;
-    } catch (error) {
-        if (axios.isCancel(error) || error.name === "CanceledError") {
-            console.log("Request cancelled:", error.message)
-        } else {
-            throw error;
-        }
+    const axiosOptions = {
+        method: "get",
+        headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${API_KEY}`
+        },
+        url: endpoint,
+        responseType: "json",
+        signal: signal
     }
-    return null;
+    const response = await axios(axiosOptions);
+    return await response.data;
+
 }
 
 export const testApiKey = async (apiKey) => {

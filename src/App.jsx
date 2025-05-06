@@ -8,7 +8,7 @@ import { GlobalStateContext, MovieStateContext } from './States.jsx'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import createMovieQueryOptions, { createTestApiKeyQueryOptions } from './data/queryOptions/MovieQueryOptions.js'
 import { ErrorPage } from './components/ErrorPage.jsx'
-import InfiniteScrollComponent from './test.jsx'
+import { useDebounce } from 'use-debounce'
 
 const Header = () => {
 
@@ -34,15 +34,16 @@ const Header = () => {
 export const AllMovies = () => {
 
   const { searchTerm } = useContext(GlobalStateContext)
+  const [debouncedSearch] = useDebounce(searchTerm, 500)
   const [movieList, setMovieList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(null);
   const observerRef = useRef();
-  const { data, isPending, isError, error } = useQuery(createMovieQueryOptions(searchTerm, currentPage || 1))
+  const { data, isPending, isError, error } = useQuery(createMovieQueryOptions(debouncedSearch, currentPage || 1))
   useEffect(() => {
     setMovieList([]);
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [debouncedSearch]);
 
 
   useEffect(() => {
@@ -51,7 +52,7 @@ export const AllMovies = () => {
       setMovieList(prev => [...new Set([...prev, ...data.results])])
       setTotalPages(data.total_pages)
     }
-  }, [searchTerm, isPending, currentPage, data])
+  }, [debouncedSearch, isPending, currentPage, data])
 
   // useCallback is similar to useEffect, but we can use it to access element like useRef! and each time one of it's depencendies changes, the callback will run!
   // combining useEffect and useRef => useCallback
