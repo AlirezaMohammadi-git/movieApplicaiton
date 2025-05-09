@@ -2,7 +2,7 @@
 import heroImage from './assets/hero.png'
 import { SearchBox } from './components/Search.jsx'
 import { useContext, useState, useRef, useCallback, useEffect } from 'react'
-import { Spinner } from './components/spinner.jsx'
+import { Spinner } from './components/spinner'
 import { MovieCard } from './components/MovieCard.jsx'
 import { GlobalStateContext, MovieStateContext } from './States.jsx'
 import { useMutation, useQuery } from '@tanstack/react-query'

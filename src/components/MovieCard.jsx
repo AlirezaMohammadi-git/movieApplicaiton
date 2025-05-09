@@ -1,6 +1,6 @@
-import React, { useContext } from "react"
+import { useContext } from "react"
 import starImage from '../assets/star.svg'
-import noMovieImage from "../assets/no-movie.png"
+import noMovieImage from "../assets/no_movie.png"
 import { MovieStateContext } from "../States"
 
 export const MovieCard = () => {

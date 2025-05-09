@@ -14,14 +14,14 @@ export const SearchBox = () => {
         observer.current = new IntersectionObserver(entries => {
             if (entries[0].isIntersecting) {
                 // main search bar is visible, so disabling floating search
-                floatingSearch.current.classList.remove('active')
+                floatingSearch.current?.classList.remove('active')
                 setTimeout(() => {
-                    if (!floatingSearch.current.classList.contains('active')) {
-                        floatingSearch.current.classList.add('invisible')
+                    if (!floatingSearch.current?.classList.contains('active')) {
+                        floatingSearch.current?.classList.add('invisible')
                     }
                 }, 400);
             } else {
-                floatingSearch.current.classList.remove('invisible')
+                floatingSearch.current?.classList.remove('invisible')
                 setTimeout(() => {
                     if (!floatingSearch.current.classList.contains('invisible')) {
                         floatingSearch.current.classList.add('active')
@@ -32,7 +32,6 @@ export const SearchBox = () => {
 
         if (search) observer.current.observe(search.current)
     }, [])
-
 
     return (
         <>
